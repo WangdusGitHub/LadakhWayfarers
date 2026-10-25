@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="avatarBg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1e3a5f" />
+      <stop offset="100%" stop-color="#0a1424" />
+    </radialGradient>
+    <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#avatarBg)" rx="24"/>
+  
+  <!-- Outer Gold Border -->
+  <rect x="8" y="8" width="384" height="384" fill="none" stroke="url(#goldRing)" stroke-width="3" rx="20" opacity="0.6"/>
+
+  <!-- Mountain Silhouette in background -->
+  <polygon points="40,280 140,180 240,280" fill="#132742"/>
+  <polygon points="180,290 280,160 380,290" fill="#183153"/>
+  <polygon points="280,160 260,190 300,190" fill="#ffffff" opacity="0.6"/>
+
+  <!-- Driver Silhouette (Person with winter cap and jacket) -->
+  <!-- Head & Beanie -->
+  <ellipse cx="200" cy="155" rx="42" ry="46" fill="#fcd34d" opacity="0.85"/>
+  <!-- Beanie Cap -->
+  <path d="M 154,145 C 155,100 245,100 246,145 Z" fill="#b91c1c"/>
+  <circle cx="200" cy="100" r="10" fill="#ffffff"/>
+  <rect x="150" y="140" width="100" height="12" rx="4" fill="#991b1b"/>
+
+  <!-- Body / Warm Jacket -->
+  <path d="M 110,340 C 110,250 140,225 180,220 L 220,220 C 260,225 290,250 290,340 Z" fill="#1e293b"/>
+  <!-- Fleece zipper & collar -->
+  <path d="M 175,220 L 200,255 L 225,220" fill="#334155"/>
+  <line x1="200" y1="255" x2="200" y2="340" stroke="#f59e0b" stroke-width="3"/>
+
+  <!-- Verified Driver Badge -->
+  <g transform="translate(200, 345)">
+    <rect x="-95" y="-18" width="190" height="34" rx="17" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
+    <circle cx="-65" cy="-1" r="9" fill="#10b981"/>
+    <path d="M -69,-1 L -66,2 L -61,-4" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="5" y="4" font-family="system-ui, sans-serif" font-weight="bold" font-size="12" fill="#ffffff" text-anchor="middle">VERIFIED DRIVER</text>
+  </g>
+</svg>

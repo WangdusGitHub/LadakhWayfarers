@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1b2f" />
+      <stop offset="100%" stop-color="#1f3352" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bgGrad)" rx="12"/>
+  
+  <!-- Subtle mountain wireframe -->
+  <polygon points="50,300 200,160 320,260 440,140 550,280 550,350 50,350" fill="#13243d" opacity="0.6"/>
+  <polygon points="200,160 170,195 230,195" fill="#f8fafc" opacity="0.8"/>
+  <polygon points="440,140 410,180 470,180" fill="#f8fafc" opacity="0.8"/>
+
+  <!-- Icon Circle -->
+  <circle cx="300" cy="180" r="54" fill="#1e293b" stroke="#f59e0b" stroke-width="2" />
+  
+  <!-- Camera / Gallery Icon -->
+  <path d="M 280,165 L 290,152 L 310,152 L 320,165 L 332,165 C 336,165 340,169 340,173 L 340,205 C 340,209 336,213 332,213 L 268,213 C 264,213 260,209 260,205 L 260,173 C 260,169 264,165 268,165 Z" fill="none" stroke="#f8fafc" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="300" cy="189" r="14" fill="none" stroke="#f59e0b" stroke-width="3"/>
+  <circle cx="325" cy="173" r="3" fill="#f8fafc"/>
+
+  <!-- Instructions text -->
+  <text x="300" y="270" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="20" fill="#f8fafc" text-anchor="middle">Your Photo Here</text>
+  <text x="300" y="298" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">Replace with your photo in assets/images/ or via Cloudinary</text>
+
+  <!-- Accent banner on top -->
+  <rect x="0" y="0" width="600" height="6" fill="url(#accentGrad)"/>
+</svg>
