@@ -15,7 +15,8 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ---------------------------------------------------------------------------
 // Cloudinary Setup
@@ -250,17 +251,40 @@ app.post('/api/reviews/:id/helpful', async (req, res) => {
   }
 });
 
-// Cloudinary client upload params
-app.post('/api/upload', (req, res) => {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
-  if (!cloudName || !uploadPreset) {
-    return res.status(503).json({ error: 'Cloudinary credentials not configured.' });
+// Cloudinary Upload endpoint
+app.post('/api/upload', async (req, res) => {
+  const { data, type } = req.body || {};
+  if (!data) {
+    return res.status(400).json({ error: 'No image data provided' });
   }
-  res.json({
-    cloudName,
-    uploadPreset,
-    uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`
+
+  // If Cloudinary credentials present, upload directly
+  if (
+    process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET
+  ) {
+    try {
+      const uploadRes = await cloudinary.uploader.upload(data, {
+        folder: 'ladakh_wayfarers',
+        resource_type: 'auto'
+      });
+      return res.json({
+        url: uploadRes.secure_url,
+        publicId: uploadRes.public_id,
+        mediaType: uploadRes.resource_type === 'video' ? 'video' : 'image',
+        source: 'cloudinary'
+      });
+    } catch (cErr) {
+      console.warn('Cloudinary upload warning:', cErr.message);
+    }
+  }
+
+  // Fallback to local base64 data URI
+  return res.json({
+    url: data,
+    mediaType: type?.startsWith('video/') ? 'video' : 'image',
+    source: 'local'
   });
 });
 

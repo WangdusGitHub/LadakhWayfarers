@@ -364,16 +364,16 @@ export default function Tours() {
                 </div>
 
                 {/* CTA */}
-                <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'center' }}>
+                <div className="modal-actions-row">
                   <a
                     href={buildBookingLink(modalTour)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn btn-gold"
+                    className="btn btn-gold modal-book-btn"
                   >
-                    Book This Tour on WhatsApp
+                    <span>💬</span> Book This Tour on WhatsApp
                   </a>
-                  <button className="btn btn-ghost" onClick={() => setModalTour(null)}>Close</button>
+                  <button className="btn btn-ghost modal-dismiss-btn" onClick={() => setModalTour(null)}>Close</button>
                 </div>
               </div>
             </motion.div>

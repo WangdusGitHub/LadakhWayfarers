@@ -52,6 +52,8 @@ export default function Reviews() {
     name: '', email: '', origin: '', route: '',
     rating: 5, date: new Date().toISOString().split('T')[0], review: '', photoUrl: '',
   });
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [hoverStar, setHoverStar] = useState(0);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
@@ -108,8 +110,31 @@ export default function Reviews() {
   /* ---------- Form submit ---------- */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.review || form.rating === 0) return;
+    setSubmitError(null);
 
+    // Validate fields with clear user feedback
+    const errs: { [key: string]: string } = {};
+    if (!form.name.trim()) errs.name = 'Please enter your name.';
+    if (!form.email.trim()) {
+      errs.email = 'Please enter your email address.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      errs.email = 'Please enter a valid email address (e.g. yourname@example.com).';
+    }
+    if (!form.review.trim()) {
+      errs.review = 'Please write a few words about your journey.';
+    } else if (form.review.trim().length < 10) {
+      errs.review = `Please write at least 10 characters (currently ${form.review.trim().length}).`;
+    }
+    if (form.rating < 1) {
+      errs.rating = 'Please choose a star rating (1 to 5 stars).';
+    }
+
+    if (Object.keys(errs).length > 0) {
+      setFormErrors(errs);
+      return;
+    }
+
+    setFormErrors({});
     setSubmitting(true);
     setUploadProgress(20);
 
@@ -146,8 +171,10 @@ export default function Reviews() {
       setPhotoPreview('');
       setUploadProgress(0);
       setHoverStar(0);
-    } catch (err) {
+      setFormErrors({});
+    } catch (err: any) {
       console.error('Failed to submit review:', err);
+      setSubmitError(err?.message || 'Unable to submit review. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -429,8 +456,23 @@ export default function Reviews() {
 
               <div className="review-form-wrap" style={{ maxWidth: 720, margin: '0 auto' }}>
                 <form onSubmit={handleSubmit} noValidate>
+                  {/* Global Submit Error Banner */}
+                  {submitError && (
+                    <div style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.35)',
+                      color: '#ef4444',
+                      padding: '12px 16px',
+                      borderRadius: 'var(--radius-md)',
+                      marginBottom: 20,
+                      fontSize: '0.88rem'
+                    }}>
+                      ⚠️ {submitError}
+                    </div>
+                  )}
+
                   {/* Star picker */}
-                  <div style={{ textAlign: 'center', marginBottom: 4 }}>
+                  <div style={{ textAlign: 'center', marginBottom: 12 }}>
                     <label className="form-label" style={{ display: 'block', marginBottom: 8 }}>Your Rating</label>
                     <div className="star-picker">
                       {[1, 2, 3, 4, 5].map((n) => (
@@ -440,7 +482,10 @@ export default function Reviews() {
                           className={`star-pick-btn${form.rating >= n || hoverStar >= n ? ' active' : ''}`}
                           onMouseEnter={() => setHoverStar(n)}
                           onMouseLeave={() => setHoverStar(0)}
-                          onClick={() => setForm((f) => ({ ...f, rating: n }))}
+                          onClick={() => {
+                            setForm((f) => ({ ...f, rating: n }));
+                            setFormErrors((prev) => ({ ...prev, rating: '' }));
+                          }}
                           aria-label={`Rate ${n} out of 5 — ${STAR_LABELS[n]}`}
                         >
                           ★
@@ -450,6 +495,7 @@ export default function Reviews() {
                     {(hoverStar || form.rating) > 0 && (
                       <div className="star-pick-label">{STAR_LABELS[hoverStar || form.rating]}</div>
                     )}
+                    {formErrors.rating && <div className="field-error-msg">{formErrors.rating}</div>}
                   </div>
 
                   {/* Name + Email */}
@@ -463,8 +509,13 @@ export default function Reviews() {
                         placeholder="e.g. Priya Sharma"
                         required
                         value={form.name}
-                        onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                        style={formErrors.name ? { borderColor: '#ef4444' } : undefined}
+                        onChange={(e) => {
+                          setForm((f) => ({ ...f, name: e.target.value }));
+                          if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: '' }));
+                        }}
                       />
+                      {formErrors.name && <div className="field-error-msg">{formErrors.name}</div>}
                     </div>
                     <div className="form-group">
                       <label className="form-label" htmlFor="rev-email">Email Address *</label>
@@ -475,8 +526,13 @@ export default function Reviews() {
                         placeholder="e.g. priya@example.com"
                         required
                         value={form.email}
-                        onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                        style={formErrors.email ? { borderColor: '#ef4444' } : undefined}
+                        onChange={(e) => {
+                          setForm((f) => ({ ...f, email: e.target.value }));
+                          if (formErrors.email) setFormErrors((prev) => ({ ...prev, email: '' }));
+                        }}
                       />
+                      {formErrors.email && <div className="field-error-msg">{formErrors.email}</div>}
                     </div>
                   </div>
 
@@ -532,13 +588,25 @@ export default function Reviews() {
                       rows={5}
                       placeholder="Share your experience — what made this journey special? How was the safety, driving, and service?"
                       required
-                      minLength={40}
                       value={form.review}
-                      onChange={(e) => setForm((f) => ({ ...f, review: e.target.value }))}
-                      style={{ resize: 'vertical' }}
+                      style={{
+                        resize: 'vertical',
+                        ...(formErrors.review ? { borderColor: '#ef4444' } : {})
+                      }}
+                      onChange={(e) => {
+                        setForm((f) => ({ ...f, review: e.target.value }));
+                        if (formErrors.review) setFormErrors((prev) => ({ ...prev, review: '' }));
+                      }}
                     />
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: 4 }}>
-                      {form.review.length} / 40 min characters
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: 4 }}>
+                      <span style={{ color: form.review.trim().length >= 10 ? '#10b981' : 'var(--text-dim)' }}>
+                        {form.review.trim().length >= 10
+                          ? `✓ Ready to submit (${form.review.trim().length} characters)`
+                          : `${form.review.trim().length} / 10 min characters`}
+                      </span>
+                      {formErrors.review && (
+                        <span className="field-error-msg" style={{ marginTop: 0 }}>{formErrors.review}</span>
+                      )}
                     </div>
                   </div>
 
@@ -590,7 +658,7 @@ export default function Reviews() {
                     <button
                       type="submit"
                       className="btn btn-gold btn-lg"
-                      disabled={submitting || form.review.length < 40}
+                      disabled={submitting}
                       style={{ width: '100%', maxWidth: 360 }}
                       id="submit-review-btn"
                     >

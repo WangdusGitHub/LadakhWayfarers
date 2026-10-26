@@ -5,6 +5,19 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+if (
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
+  });
+}
+
 export function devApiPlugin(): Plugin {
   let isDbReady = false;
 
@@ -146,6 +159,39 @@ export function devApiPlugin(): Plugin {
             const updated = await Review.findOneAndUpdate({ id }, { $inc: { helpfulCount: 1 } }, { new: true });
             res.statusCode = 200;
             return res.end(JSON.stringify({ success: true, helpfulCount: updated?.helpfulCount || 1 }));
+          }
+
+          // Cloudinary Upload
+          if (pathname === '/api/upload' && method === 'POST') {
+            const body = await readBody();
+            if (body && body.data) {
+              if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+                try {
+                  const uploadRes = await cloudinary.uploader.upload(body.data, {
+                    folder: 'ladakh_wayfarers',
+                    resource_type: 'auto'
+                  });
+                  res.statusCode = 200;
+                  return res.end(JSON.stringify({
+                    url: uploadRes.secure_url,
+                    publicId: uploadRes.public_id,
+                    mediaType: uploadRes.resource_type === 'video' ? 'video' : 'image',
+                    source: 'cloudinary'
+                  }));
+                } catch (cErr: any) {
+                  console.warn('Cloudinary upload warning:', cErr.message);
+                }
+              }
+              // Fallback to local base64 data URL
+              res.statusCode = 200;
+              return res.end(JSON.stringify({
+                url: body.data,
+                mediaType: body.type?.startsWith('video/') ? 'video' : 'image',
+                source: 'local'
+              }));
+            }
+            res.statusCode = 400;
+            return res.end(JSON.stringify({ error: 'No data provided' }));
           }
 
           // If no route matched

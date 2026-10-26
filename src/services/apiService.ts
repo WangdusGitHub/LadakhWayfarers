@@ -226,13 +226,23 @@ export interface UploadResult {
 }
 
 export async function uploadMedia(file: File): Promise<UploadResult> {
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
+  // Generate local data URI first
+  const localDataUri = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = err => reject(err);
+    reader.readAsDataURL(file);
+  });
 
+  try {
     const res = await fetch(`${API_BASE}/upload`, {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        data: localDataUri,
+        name: file.name,
+        type: file.type
+      })
     });
 
     if (res.ok) {
@@ -247,20 +257,15 @@ export async function uploadMedia(file: File): Promise<UploadResult> {
       }
     }
   } catch (e) {
-    console.info('Serverless upload endpoint unreachable, generating local preview URL.');
+    console.info('Upload endpoint unreachable, using local photo preview.');
   }
 
-  // Fallback to local Base64 / Blob preview
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve({
-      url: reader.result as string,
-      mediaType: file.type.startsWith('video/') ? 'video' : 'image',
-      source: 'local'
-    });
-    reader.onerror = err => reject(err);
-    reader.readAsDataURL(file);
-  });
+  // Fallback to local Data URI
+  return {
+    url: localDataUri,
+    mediaType: file.type.startsWith('video/') ? 'video' : 'image',
+    source: 'local'
+  };
 }
 
 /**
